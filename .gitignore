@@ -6,3 +6,4 @@ dist
 .DS_Store
 src/index.css.bak
 Orso-*.png
+.vercel

@@ -258,7 +258,7 @@ function CoursePlayerLayout() {
             {course.title}
           </span>
         </div>
-        <div className="mx-auto max-w-4xl p-6">
+        <div className="mx-auto max-w-6xl p-6">
           <Outlet />
         </div>
       </main>

@@ -163,15 +163,35 @@ function LessonViewer() {
       <h1 className="text-xl font-bold">{lesson.title}</h1>
 
       {/* Video player */}
-      {lesson.type === "video" && embedUrl && (
-        <div className="aspect-video w-full overflow-hidden rounded-lg border bg-black">
-          <iframe
-            src={embedUrl}
-            className="h-full w-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+      {lesson.type === "video" && (
+        embedUrl ? (
+          <div className="-mx-6 aspect-video overflow-hidden bg-black">
+            <iframe
+              src={embedUrl}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="-mx-6 relative aspect-video overflow-hidden bg-muted">
+            {course?.thumbnail_url ? (
+              <img
+                src={course.thumbnail_url}
+                alt={course.title}
+                className="h-full w-full object-cover"
+              />
+            ) : null}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90">
+                <Video className="h-7 w-7 text-muted-foreground" />
+              </div>
+            </div>
+            <p className="absolute bottom-3 left-0 right-0 text-center text-sm text-white/80">
+              Vidéo non disponible
+            </p>
+          </div>
+        )
       )}
 
       {/* Text content */}
@@ -218,28 +238,25 @@ function LessonViewer() {
               className="gap-2"
             >
               <CheckCircle2 className="h-4 w-4" />
-              {completing ? "..." : "Marquer comme terminé"}
+              {completing ? "..." : "Terminé"}
             </Button>
           )}
-          {isCompleted && (
-            <span className="flex items-center gap-1 text-sm text-green-600">
-              <CheckCircle2 className="h-4 w-4" />
-              Terminé
-            </span>
-          )}
-        </div>
-
-        <div>
-          {nextLesson && (
+          {isCompleted && nextLesson && (
             <Link
               to="/learn/$courseSlug/$lessonId"
               params={{ courseSlug, lessonId: nextLesson.id }}
             >
-              <Button variant="outline" size="sm" className="gap-1">
-                Suivant
+              <Button className="gap-2">
+                Leçon suivante
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
+          )}
+          {isCompleted && !nextLesson && (
+            <span className="flex items-center gap-1 text-sm text-green-600">
+              <CheckCircle2 className="h-4 w-4" />
+              Cours terminé
+            </span>
           )}
         </div>
       </div>

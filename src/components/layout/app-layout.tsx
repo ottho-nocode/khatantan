@@ -1,14 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
 import {
   BookOpen,
-  GraduationCap,
   Heart,
   Home,
   LogOut,
   Settings,
-  Globe,
-  User,
   Menu,
   X,
   Facebook,
@@ -19,108 +17,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-
-const navLinks = [
-  { name: "Accueil", path: "/" },
-  { name: "Cours", path: "/courses" },
-  { name: "À propos", path: "/about" },
-];
-
-const sidebarItems = [
-  { to: "/dashboard", label: "Tableau de bord", icon: Home },
-  { to: "/my-learning", label: "Mes cours", icon: BookOpen },
-  { to: "/favorites", label: "Favoris", icon: Heart },
-  { to: "/certificates", label: "Certificats", icon: GraduationCap },
-  { to: "/settings", label: "Paramètres", icon: Settings },
-];
+import { TopNavbar } from "./top-navbar";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { profile, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const isNavActive = (path: string) => location.pathname === path;
+  const sidebarItems = [
+    { to: "/dashboard", label: t("sidebar.dashboard"), icon: Home },
+    { to: "/my-learning", label: t("sidebar.myCourses"), icon: BookOpen },
+    { to: "/favorites", label: t("sidebar.favorites"), icon: Heart },
+    { to: "/settings", label: t("sidebar.settings"), icon: Settings },
+  ];
+
   const isSidebarActive = (path: string) => location.pathname === path;
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Top Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-primary/10 bg-white/80 backdrop-blur-md dark:bg-background/80">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Link to="/" className="flex shrink-0 items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-                K
-              </div>
-              <span className="font-serif text-xl font-bold text-foreground">
-                Khatantan
-              </span>
-            </Link>
-            <div className="ml-8 hidden space-x-6 md:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={cn(
-                    "text-sm font-medium transition-colors",
-                    isNavActive(link.path)
-                      ? "text-foreground underline decoration-primary underline-offset-[20px] decoration-2"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="hidden items-center gap-3 md:flex">
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-              <Globe className="h-4 w-4" />
-              MN
-            </Button>
-            <Link to="/dashboard">
-              <Button variant="outline" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-                Espace &Eacute;l&egrave;ve
-              </Button>
-            </Link>
-            <Button variant="ghost" size="icon-sm" onClick={() => signOut()}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <button
-            className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="border-b border-primary/10 bg-white px-4 pb-4 md:hidden dark:bg-background">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-        )}
-      </nav>
+      <TopNavbar />
 
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
         <aside className="hidden w-56 shrink-0 border-r border-primary/10 bg-white md:block dark:bg-card">
           <div className="p-5">
             <h2 className="font-serif text-base font-bold text-foreground">
-              Espace &Eacute;l&egrave;ve
+              {t("sidebar.studentArea")}
             </h2>
           </div>
           <nav className="flex flex-col gap-0.5 px-3">
@@ -138,7 +61,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <item.icon
                   className={cn(
                     "h-4 w-4",
-                    isSidebarActive(item.to) ? "text-primary" : "text-muted-foreground",
+                    isSidebarActive(item.to)
+                      ? "text-primary"
+                      : "text-muted-foreground",
                   )}
                 />
                 {item.label}
@@ -153,7 +78,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               onClick={() => signOut()}
             >
               <LogOut className="h-4 w-4" />
-              D&eacute;connexion
+              {t("sidebar.logout")}
             </Button>
           </div>
         </aside>
@@ -167,7 +92,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             className="gap-2"
           >
             <Menu className="h-4 w-4" />
-            Menu
+            {t("sidebar.menu")}
           </Button>
         </div>
 
@@ -180,7 +105,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             />
             <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl dark:bg-card">
               <div className="flex items-center justify-between border-b p-4">
-                <span className="font-serif font-bold">Espace &Eacute;l&egrave;ve</span>
+                <span className="font-serif font-bold">
+                  {t("sidebar.studentArea")}
+                </span>
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -212,7 +139,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto" style={{ backgroundColor: "#FFF4F7" }}>
+        <main
+          className="flex-1 overflow-auto"
+          style={{ backgroundColor: "#FFF4F7" }}
+        >
           <div className="mx-auto max-w-5xl p-6 lg:p-8">{children}</div>
         </main>
       </div>
@@ -231,33 +161,62 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </span>
               </Link>
               <p className="text-sm text-muted-foreground">
-                La plateforme d'apprentissage d&eacute;di&eacute;e au
-                d&eacute;veloppement personnel et spirituel en Mongolie.
+                {t("footer.description")}
               </p>
             </div>
             <div>
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">
-                Plateforme
+                {t("footer.platform")}
               </h3>
               <ul className="space-y-3">
-                <li><Link to="/courses" className="text-sm text-muted-foreground hover:text-primary">Tous les cours</Link></li>
-                <li><Link to="/" className="text-sm text-muted-foreground hover:text-primary">&Agrave; propos</Link></li>
-                <li><span className="text-sm text-muted-foreground">Tarifs</span></li>
+                <li>
+                  <Link
+                    to="/courses"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    {t("footer.allCourses")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    {t("footer.about")}
+                  </Link>
+                </li>
+                <li>
+                  <span className="text-sm text-muted-foreground">
+                    {t("footer.pricing")}
+                  </span>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">
-                Support
+                {t("footer.support")}
               </h3>
               <ul className="space-y-3">
-                <li><span className="text-sm text-muted-foreground">Contact</span></li>
-                <li><span className="text-sm text-muted-foreground">CGV</span></li>
-                <li><span className="text-sm text-muted-foreground">FAQ</span></li>
+                <li>
+                  <span className="text-sm text-muted-foreground">
+                    {t("footer.contact")}
+                  </span>
+                </li>
+                <li>
+                  <span className="text-sm text-muted-foreground">
+                    {t("footer.terms")}
+                  </span>
+                </li>
+                <li>
+                  <span className="text-sm text-muted-foreground">
+                    {t("footer.faq")}
+                  </span>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">
-                Suivez-nous
+                {t("footer.followUs")}
               </h3>
               <div className="flex gap-4">
                 <Facebook className="h-5 w-5 text-muted-foreground" />
@@ -269,7 +228,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="mt-8 border-t border-primary/10 pt-8">
             <p className="text-center text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} Khatantan. Tous droits r&eacute;serv&eacute;s.
+              &copy; {new Date().getFullYear()} Khatantan.{" "}
+              {t("footer.copyright")}
             </p>
           </div>
         </div>

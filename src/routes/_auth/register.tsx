@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function RegisterPage() {
   const { signUp } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,10 +37,10 @@ function RegisterPage() {
           K
         </div>
         <h2 className="font-serif text-3xl font-bold text-foreground">
-          Cr&eacute;er un compte
+          {t("auth.createAccount")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Rejoignez la communaut&eacute; Khatantan
+          {t("auth.registerSubtitle")}
         </p>
       </div>
 
@@ -49,11 +51,11 @@ function RegisterPage() {
           </div>
         )}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="displayName">Nom complet</Label>
+          <Label htmlFor="displayName">{t("auth.fullName")}</Label>
           <Input
             id="displayName"
             type="text"
-            placeholder="Jean Dupont"
+            placeholder={t("auth.namePlaceholder")}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             className="rounded-lg"
@@ -61,11 +63,11 @@ function RegisterPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="vous@exemple.com"
+            placeholder={t("auth.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="rounded-lg"
@@ -73,7 +75,7 @@ function RegisterPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">{t("auth.password")}</Label>
           <Input
             id="password"
             type="password"
@@ -94,27 +96,27 @@ function RegisterPage() {
             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
           />
           <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
-            J'accepte les{" "}
+            {t("auth.acceptTermsPre")}{" "}
             <span className="cursor-pointer text-primary hover:underline">
-              CGV
+              {t("footer.terms")}
             </span>{" "}
-            et la politique de confidentialit&eacute;
+            {t("auth.acceptTermsPost")}
           </label>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Inscription..." : "S'inscrire"}
+          {isLoading ? t("auth.registering") : t("auth.registerButton")}
         </Button>
       </form>
 
       <div className="mt-4 text-center">
         <p className="text-sm text-muted-foreground">
-          D&eacute;j&agrave; un compte ?{" "}
+          {t("auth.hasAccount")}{" "}
           <Link
             to="/login"
             className="font-medium text-primary hover:text-primary/80"
           >
-            Se connecter
+            {t("auth.loginLink")}
           </Link>
         </p>
       </div>

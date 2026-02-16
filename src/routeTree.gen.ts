@@ -17,14 +17,15 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as LearnCourseSlugRouteImport } from './routes/learn/$courseSlug'
+import { Route as InstructorProfileRouteImport } from './routes/instructor/profile'
 import { Route as InstructorDashboardRouteImport } from './routes/instructor/dashboard'
+import { Route as InstructorAnalyticsRouteImport } from './routes/instructor/analytics'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminBadgesRouteImport } from './routes/admin/badges'
 import { Route as PublicVerifyCertificateRouteImport } from './routes/_public/verify-certificate'
-import { Route as PublicLeaderboardRouteImport } from './routes/_public/leaderboard'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
@@ -81,9 +82,19 @@ const LearnCourseSlugRoute = LearnCourseSlugRouteImport.update({
   path: '/$courseSlug',
   getParentRoute: () => LearnRoute,
 } as any)
+const InstructorProfileRoute = InstructorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => InstructorRoute,
+} as any)
 const InstructorDashboardRoute = InstructorDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => InstructorRoute,
+} as any)
+const InstructorAnalyticsRoute = InstructorAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => InstructorRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -114,11 +125,6 @@ const AdminBadgesRoute = AdminBadgesRouteImport.update({
 const PublicVerifyCertificateRoute = PublicVerifyCertificateRouteImport.update({
   id: '/verify-certificate',
   path: '/verify-certificate',
-  getParentRoute: () => PublicRoute,
-} as any)
-const PublicLeaderboardRoute = PublicLeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
   getParentRoute: () => PublicRoute,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -229,14 +235,15 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
-  '/leaderboard': typeof PublicLeaderboardRoute
   '/verify-certificate': typeof PublicVerifyCertificateRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/dashboard': typeof InstructorDashboardRoute
+  '/instructor/profile': typeof InstructorProfileRoute
   '/learn/$courseSlug': typeof LearnCourseSlugRouteWithChildren
   '/': typeof PublicIndexRoute
   '/courses/$courseSlug': typeof PublicCoursesCourseSlugRoute
@@ -262,14 +269,15 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
-  '/leaderboard': typeof PublicLeaderboardRoute
   '/verify-certificate': typeof PublicVerifyCertificateRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/dashboard': typeof InstructorDashboardRoute
+  '/instructor/profile': typeof InstructorProfileRoute
   '/learn/$courseSlug': typeof LearnCourseSlugRouteWithChildren
   '/': typeof PublicIndexRoute
   '/courses/$courseSlug': typeof PublicCoursesCourseSlugRoute
@@ -299,14 +307,15 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
-  '/_public/leaderboard': typeof PublicLeaderboardRoute
   '/_public/verify-certificate': typeof PublicVerifyCertificateRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/courses': typeof AdminCoursesRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/users': typeof AdminUsersRoute
+  '/instructor/analytics': typeof InstructorAnalyticsRoute
   '/instructor/dashboard': typeof InstructorDashboardRoute
+  '/instructor/profile': typeof InstructorProfileRoute
   '/learn/$courseSlug': typeof LearnCourseSlugRouteWithChildren
   '/_public/': typeof PublicIndexRoute
   '/_public/courses/$courseSlug': typeof PublicCoursesCourseSlugRoute
@@ -334,14 +343,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/login'
     | '/register'
-    | '/leaderboard'
     | '/verify-certificate'
     | '/admin/badges'
     | '/admin/categories'
     | '/admin/courses'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/instructor/analytics'
     | '/instructor/dashboard'
+    | '/instructor/profile'
     | '/learn/$courseSlug'
     | '/'
     | '/courses/$courseSlug'
@@ -367,14 +377,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/login'
     | '/register'
-    | '/leaderboard'
     | '/verify-certificate'
     | '/admin/badges'
     | '/admin/categories'
     | '/admin/courses'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/instructor/analytics'
     | '/instructor/dashboard'
+    | '/instructor/profile'
     | '/learn/$courseSlug'
     | '/'
     | '/courses/$courseSlug'
@@ -403,14 +414,15 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_auth/login'
     | '/_auth/register'
-    | '/_public/leaderboard'
     | '/_public/verify-certificate'
     | '/admin/badges'
     | '/admin/categories'
     | '/admin/courses'
     | '/admin/dashboard'
     | '/admin/users'
+    | '/instructor/analytics'
     | '/instructor/dashboard'
+    | '/instructor/profile'
     | '/learn/$courseSlug'
     | '/_public/'
     | '/_public/courses/$courseSlug'
@@ -491,11 +503,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnCourseSlugRouteImport
       parentRoute: typeof LearnRoute
     }
+    '/instructor/profile': {
+      id: '/instructor/profile'
+      path: '/profile'
+      fullPath: '/instructor/profile'
+      preLoaderRoute: typeof InstructorProfileRouteImport
+      parentRoute: typeof InstructorRoute
+    }
     '/instructor/dashboard': {
       id: '/instructor/dashboard'
       path: '/dashboard'
       fullPath: '/instructor/dashboard'
       preLoaderRoute: typeof InstructorDashboardRouteImport
+      parentRoute: typeof InstructorRoute
+    }
+    '/instructor/analytics': {
+      id: '/instructor/analytics'
+      path: '/analytics'
+      fullPath: '/instructor/analytics'
+      preLoaderRoute: typeof InstructorAnalyticsRouteImport
       parentRoute: typeof InstructorRoute
     }
     '/admin/users': {
@@ -538,13 +564,6 @@ declare module '@tanstack/react-router' {
       path: '/verify-certificate'
       fullPath: '/verify-certificate'
       preLoaderRoute: typeof PublicVerifyCertificateRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/leaderboard': {
-      id: '/_public/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/leaderboard'
-      preLoaderRoute: typeof PublicLeaderboardRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_auth/register': {
@@ -711,7 +730,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface PublicRouteChildren {
-  PublicLeaderboardRoute: typeof PublicLeaderboardRoute
   PublicVerifyCertificateRoute: typeof PublicVerifyCertificateRoute
   PublicIndexRoute: typeof PublicIndexRoute
   PublicCoursesCourseSlugRoute: typeof PublicCoursesCourseSlugRoute
@@ -719,7 +737,6 @@ interface PublicRouteChildren {
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
-  PublicLeaderboardRoute: PublicLeaderboardRoute,
   PublicVerifyCertificateRoute: PublicVerifyCertificateRoute,
   PublicIndexRoute: PublicIndexRoute,
   PublicCoursesCourseSlugRoute: PublicCoursesCourseSlugRoute,
@@ -768,14 +785,18 @@ const InstructorCoursesCourseIdRouteWithChildren =
   )
 
 interface InstructorRouteChildren {
+  InstructorAnalyticsRoute: typeof InstructorAnalyticsRoute
   InstructorDashboardRoute: typeof InstructorDashboardRoute
+  InstructorProfileRoute: typeof InstructorProfileRoute
   InstructorCoursesCourseIdRoute: typeof InstructorCoursesCourseIdRouteWithChildren
   InstructorCoursesNewRoute: typeof InstructorCoursesNewRoute
   InstructorCoursesIndexRoute: typeof InstructorCoursesIndexRoute
 }
 
 const InstructorRouteChildren: InstructorRouteChildren = {
+  InstructorAnalyticsRoute: InstructorAnalyticsRoute,
   InstructorDashboardRoute: InstructorDashboardRoute,
+  InstructorProfileRoute: InstructorProfileRoute,
   InstructorCoursesCourseIdRoute: InstructorCoursesCourseIdRouteWithChildren,
   InstructorCoursesNewRoute: InstructorCoursesNewRoute,
   InstructorCoursesIndexRoute: InstructorCoursesIndexRoute,

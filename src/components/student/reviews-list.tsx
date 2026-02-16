@@ -1,4 +1,5 @@
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
+import { useTranslation } from "@/contexts/Language";
 import { Star } from "lucide-react";
 
 interface ReviewsListProps {
@@ -6,6 +7,8 @@ interface ReviewsListProps {
 }
 
 export function ReviewsList({ courseId }: ReviewsListProps) {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useDatabaseQuery({
     from: "reviews",
     where: {
@@ -23,12 +26,14 @@ export function ReviewsList({ courseId }: ReviewsListProps) {
   const reviews = data?.data ?? [];
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Chargement...</div>;
+    return (
+      <div className="text-sm text-muted-foreground">{t("common.loading")}</div>
+    );
   }
 
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">Aucun avis pour le moment.</p>
+      <p className="text-sm text-muted-foreground">{t("reviews.noReviews")}</p>
     );
   }
 
@@ -42,7 +47,7 @@ export function ReviewsList({ courseId }: ReviewsListProps) {
                 {review.profiles?.display_name?.charAt(0)?.toUpperCase() ?? "?"}
               </div>
               <span className="text-sm font-medium">
-                {review.profiles?.display_name ?? "Anonyme"}
+                {review.profiles?.display_name ?? t("reviews.anonymous")}
               </span>
             </div>
             <div className="flex gap-0.5">
@@ -66,7 +71,9 @@ export function ReviewsList({ courseId }: ReviewsListProps) {
           )}
           {review.instructor_reply && (
             <div className="mt-3 rounded-md bg-muted/50 p-3">
-              <p className="text-xs font-medium">Réponse de l'instructeur</p>
+              <p className="text-xs font-medium">
+                {t("reviews.instructorReply")}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {review.instructor_reply}
               </p>

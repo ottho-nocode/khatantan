@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
 import { Heart, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function FavoritesPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data, isLoading } = useDatabaseQuery({
     from: "favorites",
@@ -20,11 +22,9 @@ function FavoritesPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="font-serif text-2xl font-bold text-foreground">
-          Mes Favoris
+          {t("favorites.title")}
         </h1>
-        <p className="text-muted-foreground">
-          Retrouvez les cours que vous avez sauvegardés.
-        </p>
+        <p className="text-muted-foreground">{t("favorites.subtitle")}</p>
       </div>
 
       {isLoading ? (
@@ -39,12 +39,14 @@ function FavoritesPage() {
       ) : favorites.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary/20 py-16">
           <Heart className="h-12 w-12 text-muted-foreground/50" />
-          <p className="mt-4 text-lg font-medium">Aucun favori</p>
+          <p className="mt-4 text-lg font-medium">
+            {t("favorites.noFavorites")}
+          </p>
           <p className="text-sm text-muted-foreground">
-            Ajoutez des cours à vos favoris pour les retrouver ici.
+            {t("favorites.noFavoritesSubtitle")}
           </p>
           <Link to="/courses" className="mt-4">
-            <Button className="gap-2">Explorer les cours</Button>
+            <Button className="gap-2">{t("favorites.exploreCourses")}</Button>
           </Link>
         </div>
       ) : (
@@ -89,7 +91,7 @@ function FavoritesPage() {
                     className="mt-3 block"
                   >
                     <Button variant="outline" size="sm" className="w-full">
-                      Voir le cours
+                      {t("favorites.viewCourse")}
                     </Button>
                   </Link>
                 </div>

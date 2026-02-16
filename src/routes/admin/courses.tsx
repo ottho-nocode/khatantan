@@ -161,7 +161,8 @@ function AdminCoursesPage() {
                           <X className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      {course.status === "draft" && (
+                      {(course.status === "draft" ||
+                        course.status === "archived") && (
                         <Button
                           variant="ghost"
                           size="icon"

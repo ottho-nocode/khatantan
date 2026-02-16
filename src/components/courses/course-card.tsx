@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "@/contexts/Language";
 import { Clock, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -7,19 +8,21 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
+  const { t } = useTranslation();
+
   const levelLabel =
     course.level === "beginner"
-      ? "Débutant"
+      ? t("courses.beginner")
       : course.level === "intermediate"
-        ? "Intermédiaire"
+        ? t("courses.intermediate")
         : course.level === "advanced"
-          ? "Avancé"
-          : "Tous niveaux";
+          ? t("courses.advanced")
+          : t("courses.allLevels");
 
   const instructorName =
     course.instructor_profiles?.profiles?.display_name ??
     course.instructorName ??
-    "Enseignant";
+    t("courses.instructor");
 
   const categoryName =
     course.categories?.name ?? course.category ?? "";
@@ -27,11 +30,11 @@ export function CourseCard({ course }: CourseCardProps) {
   const price =
     typeof course.price_cents === "number"
       ? course.price_cents === 0
-        ? "Gratuit"
-        : `${(course.price_cents / 100).toFixed(0)} €`
+        ? t("courses.free")
+        : `${(course.price_cents / 100).toFixed(0)} \u20ac`
       : typeof course.price === "number"
-        ? `${course.price.toLocaleString()} ₮`
-        : "—";
+        ? `${course.price.toLocaleString()} \u20ae`
+        : "\u2014";
 
   return (
     <div className="group overflow-hidden rounded-2xl border border-primary/10 bg-card shadow-sm transition-all duration-300 hover:shadow-md">
@@ -68,11 +71,15 @@ export function CourseCard({ course }: CourseCardProps) {
               {course.duration}
             </div>
           )}
-          {course.rating && (
+          {Number(course.avg_rating) > 0 && (
             <div className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              {course.rating}
-              {course.reviewsCount && ` (${course.reviewsCount})`}
+              {Number(course.avg_rating).toFixed(1)}
+              {course.rating_count > 0 && (
+                <span className="text-muted-foreground">
+                  ({course.rating_count})
+                </span>
+              )}
             </div>
           )}
           <div className="flex items-center gap-1">
@@ -83,7 +90,9 @@ export function CourseCard({ course }: CourseCardProps) {
 
         <div className="flex items-center justify-between border-t border-primary/5 pt-4">
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Enseignant</span>
+            <span className="text-xs text-muted-foreground">
+              {t("courses.instructor")}
+            </span>
             <span className="text-sm font-medium text-foreground">
               {instructorName}
             </span>
@@ -99,7 +108,7 @@ export function CourseCard({ course }: CourseCardProps) {
           className="mt-4 block"
         >
           <Button className="w-full" variant="secondary">
-            Voir le cours
+            {t("courses.viewCourse")}
           </Button>
         </Link>
       </div>

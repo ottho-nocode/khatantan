@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useDatabaseQuery } from "@/utilities";
+import { useTranslation } from "@/contexts/Language";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Search } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
 
 function CoursesPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
   const { data: coursesData, isLoading } = useDatabaseQuery({
@@ -20,7 +22,7 @@ function CoursesPage() {
           ],
         }
       : { field: "status", operator: "eq", value: "published" },
-    include: { instructor_profiles: { include: { profiles: true } } },
+    include: { instructor_profiles: { include: { profiles: true } }, categories: true },
     orderBy: [{ field: "created_at", direction: "desc" }],
     limit: 20,
   });
@@ -30,13 +32,13 @@ function CoursesPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="font-serif text-3xl font-bold text-foreground">
-            Tous les cours
+            {t("courses.allCourses")}
           </h1>
           <div className="flex gap-2">
             <select className="rounded-full border border-primary/10 bg-white px-4 py-2 text-sm dark:bg-card">
-              <option>Trier par : Popularit&eacute;</option>
-              <option>Prix croissant</option>
-              <option>Prix d&eacute;croissant</option>
+              <option>{t("courses.sortPopularity")}</option>
+              <option>{t("courses.sortPriceAsc")}</option>
+              <option>{t("courses.sortPriceDesc")}</option>
             </select>
           </div>
         </div>
@@ -45,13 +47,15 @@ function CoursesPage() {
           {/* Filters Sidebar */}
           <div className="col-span-1 hidden md:block">
             <div className="sticky top-24 rounded-xl border border-primary/10 bg-white p-6 dark:bg-card">
-              <h3 className="mb-4 font-bold text-foreground">Filtres</h3>
+              <h3 className="mb-4 font-bold text-foreground">
+                {t("courses.filters")}
+              </h3>
 
               {/* Search */}
               <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher..."
+                  placeholder={t("courses.search")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="rounded-full pl-10"
@@ -60,10 +64,14 @@ function CoursesPage() {
 
               <div className="mb-6">
                 <h4 className="mb-3 text-sm font-semibold text-foreground">
-                  Niveau
+                  {t("courses.level")}
                 </h4>
                 <div className="space-y-2">
-                  {["Débutant", "Intermédiaire", "Avancé"].map((level) => (
+                  {[
+                    t("courses.beginner"),
+                    t("courses.intermediate"),
+                    t("courses.advanced"),
+                  ].map((level) => (
                     <label key={level} className="flex items-center">
                       <input
                         type="checkbox"
@@ -79,10 +87,10 @@ function CoursesPage() {
 
               <div className="mb-6">
                 <h4 className="mb-3 text-sm font-semibold text-foreground">
-                  Prix
+                  {t("courses.price")}
                 </h4>
                 <div className="space-y-2">
-                  {["Gratuit", "Payant"].map((price) => (
+                  {[t("courses.free"), t("courses.paid")].map((price) => (
                     <label key={price} className="flex items-center">
                       <input
                         type="checkbox"
@@ -96,7 +104,7 @@ function CoursesPage() {
                 </div>
               </div>
 
-              <Button className="w-full">Filtrer</Button>
+              <Button className="w-full">{t("courses.filter")}</Button>
             </div>
           </div>
 
@@ -105,7 +113,7 @@ function CoursesPage() {
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Rechercher un cours..."
+                placeholder={t("courses.searchCourse")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="rounded-full pl-10"
@@ -130,7 +138,7 @@ function CoursesPage() {
 
             {!isLoading && coursesData?.data.length === 0 && (
               <div className="col-span-full py-20 text-center text-muted-foreground">
-                Aucun cours trouv&eacute;.
+                {t("courses.noCourses")}
               </div>
             )}
           </div>

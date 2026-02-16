@@ -1,9 +1,9 @@
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
 import { useDatabaseMutation } from "@/utilities/useDatabaseMutation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -15,6 +15,7 @@ interface ReviewFormProps {
 
 export function ReviewForm({ courseId }: ReviewFormProps) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [title, setTitle] = useState("");
@@ -45,7 +46,7 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
           id: existing.id,
           data: { rating, title: title || null, body: body || null },
         });
-        toast.success("Avis mis à jour !");
+        toast.success(t("reviews.updated"));
       } else {
         await createRow({
           data: {
@@ -56,11 +57,11 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
             body: body || null,
           },
         });
-        toast.success("Merci pour votre avis !");
+        toast.success(t("reviews.thanks"));
       }
       refetch();
     } catch (err: any) {
-      toast.error(err?.message ?? "Erreur");
+      toast.error(err?.message ?? t("common.error"));
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +71,7 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
   if (existing && !submitting) {
     return (
       <div className="rounded-lg border p-4">
-        <p className="text-sm font-medium">Votre avis</p>
+        <p className="text-sm font-medium">{t("reviews.yourReview")}</p>
         <div className="mt-1 flex gap-0.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <Star
@@ -95,7 +96,7 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border p-4">
-      <p className="text-sm font-medium">Laisser un avis</p>
+      <p className="text-sm font-medium">{t("reviews.leaveReview")}</p>
 
       {/* Star rating */}
       <div className="flex gap-1">
@@ -119,12 +120,12 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
       </div>
 
       <Input
-        placeholder="Titre (optionnel)"
+        placeholder={t("reviews.titlePlaceholder")}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <Textarea
-        placeholder="Votre avis..."
+        placeholder={t("reviews.bodyPlaceholder")}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
@@ -134,7 +135,7 @@ export function ReviewForm({ courseId }: ReviewFormProps) {
         disabled={submitting || rating === 0}
         className="w-fit"
       >
-        {submitting ? "Envoi..." : "Publier l'avis"}
+        {submitting ? t("reviews.submitting") : t("reviews.submit")}
       </Button>
     </div>
   );

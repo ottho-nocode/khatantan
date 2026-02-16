@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Eye, EyeOff, Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface CourseEditData {
   title: string;
@@ -332,6 +333,88 @@ export function CourseEditForm({
           <p className="text-xs text-muted-foreground">
             Un objectif par ligne
           </p>
+        </div>
+      </section>
+
+      {/* Status management */}
+      <section className="flex flex-col gap-4 rounded-lg border p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Publication</h2>
+            <p className="text-sm text-muted-foreground">
+              Statut actuel :{" "}
+              <Badge
+                variant={
+                  course.status === "published"
+                    ? "default"
+                    : course.status === "archived"
+                      ? "destructive"
+                      : "secondary"
+                }
+              >
+                {course.status === "published"
+                  ? "Publié"
+                  : course.status === "archived"
+                    ? "Archivé"
+                    : course.status === "review"
+                      ? "En review"
+                      : "Brouillon"}
+              </Badge>
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {(course.status === "draft" || course.status === "archived") && (
+              <Button
+                type="button"
+                variant="default"
+                className="gap-2"
+                onClick={async () => {
+                  try {
+                    await updateRow({
+                      id: courseId,
+                      data: {
+                        status: "published",
+                        published_at: new Date().toISOString(),
+                      },
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ["database", "courses", courseId],
+                    });
+                    toast.success("Cours publié !");
+                  } catch (err: any) {
+                    toast.error(err?.message ?? "Erreur");
+                  }
+                }}
+              >
+                <Eye className="h-4 w-4" />
+                Publier
+              </Button>
+            )}
+            {course.status === "published" && (
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={async () => {
+                  try {
+                    await updateRow({
+                      id: courseId,
+                      data: { status: "archived" },
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ["database", "courses", courseId],
+                    });
+                    toast.success("Cours archivé");
+                  } catch (err: any) {
+                    toast.error(err?.message ?? "Erreur");
+                  }
+                }}
+              >
+                <EyeOff className="h-4 w-4" />
+                Archiver
+              </Button>
+            )}
+          </div>
         </div>
       </section>
 

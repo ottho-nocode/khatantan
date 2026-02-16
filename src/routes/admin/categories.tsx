@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
 import { useDatabaseMutation } from "@/utilities/useDatabaseMutation";
+import { useFileUpload } from "@/utilities/useFileUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Plus, Edit3, Trash2 } from "lucide-react";
+import { Plus, Edit3, Trash2, ImagePlus, X } from "lucide-react";
 
 function generateSlug(name: string) {
   return name
@@ -33,6 +34,7 @@ function AdminCategoriesPage() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const { data, isLoading, refetch } = useDatabaseQuery({
     from: "categories",
@@ -44,10 +46,24 @@ function AdminCategoriesPage() {
     table: "categories",
   });
 
+  const {
+    onDrop,
+    onClick: onClickUpload,
+    onChange: onFileChange,
+    fileInputRef,
+    isLoading: uploading,
+  } = useFileUpload({
+    bucket: "category-thumbnails",
+    onSuccess: (file) => {
+      setThumbnailUrl(file.url);
+    },
+  });
+
   const openCreate = () => {
     setName("");
     setSlug("");
     setDescription("");
+    setThumbnailUrl("");
     setDialog({ open: true });
   };
 
@@ -55,6 +71,7 @@ function AdminCategoriesPage() {
     setName(cat.name);
     setSlug(cat.slug);
     setDescription(cat.description ?? "");
+    setThumbnailUrl(cat.thumbnail_url ?? "");
     setDialog({ open: true, editing: cat });
   };
 
@@ -65,7 +82,12 @@ function AdminCategoriesPage() {
       if (dialog.editing) {
         await updateRow({
           id: dialog.editing.id,
-          data: { name: name.trim(), slug: s, description: description || null },
+          data: {
+            name: name.trim(),
+            slug: s,
+            description: description || null,
+            thumbnail_url: thumbnailUrl || null,
+          },
         });
         toast.success("Catégorie mise à jour");
       } else {
@@ -74,6 +96,7 @@ function AdminCategoriesPage() {
             name: name.trim(),
             slug: s,
             description: description || null,
+            thumbnail_url: thumbnailUrl || null,
             position: categories.length,
           },
         });
@@ -119,6 +142,7 @@ function AdminCategoriesPage() {
             <thead>
               <tr className="border-b bg-muted/50 text-xs text-muted-foreground">
                 <th className="px-4 py-2 text-left font-medium">Pos.</th>
+                <th className="px-4 py-2 text-left font-medium">Image</th>
                 <th className="px-4 py-2 text-left font-medium">Nom</th>
                 <th className="px-4 py-2 text-left font-medium">Slug</th>
                 <th className="px-4 py-2 text-left font-medium">
@@ -132,6 +156,19 @@ function AdminCategoriesPage() {
                 <tr key={cat.id} className="border-b last:border-b-0">
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {i + 1}
+                  </td>
+                  <td className="px-4 py-3">
+                    {cat.thumbnail_url ? (
+                      <img
+                        src={cat.thumbnail_url}
+                        alt={cat.name}
+                        className="h-10 w-14 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-14 items-center justify-center rounded bg-muted">
+                        <ImagePlus className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm font-medium">{cat.name}</td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
@@ -201,6 +238,46 @@ function AdminCategoriesPage() {
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Image</Label>
+              {thumbnailUrl ? (
+                <div className="relative w-fit">
+                  <img
+                    src={thumbnailUrl}
+                    alt="Aperçu"
+                    className="h-24 w-36 rounded-lg object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setThumbnailUrl("")}
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onDrop={onDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={onClickUpload}
+                  className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors hover:border-primary/50"
+                >
+                  <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    {uploading
+                      ? "Upload en cours..."
+                      : "Cliquez ou glissez une image"}
+                  </span>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={onFileChange}
               />
             </div>
           </div>

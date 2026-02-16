@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/Auth";
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
+import { PhosphorBadgeIcon } from "@/components/ui/phosphor-badge-icon";
 import { Medal, Lock } from "lucide-react";
 
 function BadgesPage() {
@@ -85,7 +86,17 @@ function BadgesPage() {
                         earned ? "bg-primary/10" : "bg-muted"
                       }`}
                     >
-                      {badge.icon_url ? (
+                      {badge.icon_name ? (
+                        <PhosphorBadgeIcon
+                          iconName={badge.icon_name}
+                          color={
+                            earned
+                              ? badge.icon_color ?? "#e11d48"
+                              : "#9ca3af"
+                          }
+                          size={24}
+                        />
+                      ) : badge.icon_url ? (
                         <img
                           src={badge.icon_url}
                           alt=""

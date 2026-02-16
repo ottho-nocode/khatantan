@@ -19,6 +19,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { PhosphorBadgeIcon } from "@/components/ui/phosphor-badge-icon";
+import { IconPicker } from "@/components/admin/icon-picker";
+import { ColorPicker } from "@/components/admin/color-picker";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Plus, Edit3, Trash2 } from "lucide-react";
@@ -40,11 +43,24 @@ const categoryVariants: Record<
   special: "destructive",
 };
 
+const ruleTypeLabels: Record<string, string> = {
+  lessons_completed: "Leçons terminées",
+  courses_completed: "Cours terminés",
+  courses_enrolled: "Inscriptions",
+  reviews_posted: "Avis publiés",
+  streak_days: "Jours consécutifs",
+  xp_earned: "XP accumulés",
+  quizzes_passed: "Quiz réussis",
+  manual: "Attribution manuelle",
+};
+
 interface BadgeForm {
   name: string;
   slug: string;
   description: string;
   icon_url: string;
+  icon_name: string;
+  icon_color: string;
   category: string;
   xp_reward: number;
   rule_type: string;
@@ -56,6 +72,8 @@ const emptyForm: BadgeForm = {
   slug: "",
   description: "",
   icon_url: "",
+  icon_name: "",
+  icon_color: "#e11d48",
   category: "learning",
   xp_reward: 0,
   rule_type: "",
@@ -100,6 +118,8 @@ function AdminBadgesPage() {
       slug: badge.slug,
       description: badge.description ?? "",
       icon_url: badge.icon_url ?? "",
+      icon_name: badge.icon_name ?? "",
+      icon_color: badge.icon_color ?? "#e11d48",
       category: badge.category ?? "learning",
       xp_reward: badge.xp_reward ?? 0,
       rule_type: badge.rule_type ?? "",
@@ -117,6 +137,8 @@ function AdminBadgesPage() {
         slug,
         description: form.description || null,
         icon_url: form.icon_url || null,
+        icon_name: form.icon_name || null,
+        icon_color: form.icon_color || "#e11d48",
         category: form.category,
         xp_reward: form.xp_reward,
         rule_type: form.rule_type || null,
@@ -183,7 +205,13 @@ function AdminBadgesPage() {
                 <tr key={badge.id} className="border-b last:border-b-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      {badge.icon_url ? (
+                      {badge.icon_name ? (
+                        <PhosphorBadgeIcon
+                          iconName={badge.icon_name}
+                          color={badge.icon_color ?? "#e11d48"}
+                          size={24}
+                        />
+                      ) : badge.icon_url ? (
                         <img
                           src={badge.icon_url}
                           alt=""
@@ -191,7 +219,11 @@ function AdminBadgesPage() {
                         />
                       ) : (
                         <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-xs">
-                          🏆
+                          <PhosphorBadgeIcon
+                            iconName="Trophy"
+                            color="#e11d48"
+                            size={18}
+                          />
                         </div>
                       )}
                       <div>
@@ -214,7 +246,7 @@ function AdminBadgesPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {badge.rule_type
-                      ? `${badge.rule_type} ≥ ${badge.rule_threshold}`
+                      ? `${ruleTypeLabels[badge.rule_type] ?? badge.rule_type} ≥ ${badge.rule_threshold}`
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
@@ -280,14 +312,45 @@ function AdminBadgesPage() {
                 onChange={(e) => setField("description", e.target.value)}
               />
             </div>
-            <div className="grid gap-2">
-              <Label>URL icône</Label>
-              <Input
-                value={form.icon_url}
-                placeholder="https://..."
-                onChange={(e) => setField("icon_url", e.target.value)}
-              />
+
+            {/* Sélecteur d'icône + couleur */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Icône</Label>
+                <IconPicker
+                  value={form.icon_name}
+                  onChange={(name) => setField("icon_name", name)}
+                  color={form.icon_color}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Couleur</Label>
+                <ColorPicker
+                  value={form.icon_color}
+                  onChange={(hex) => setField("icon_color", hex)}
+                />
+              </div>
             </div>
+
+            {/* Aperçu du badge */}
+            {form.icon_name && (
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background">
+                  <PhosphorBadgeIcon
+                    iconName={form.icon_name}
+                    color={form.icon_color}
+                    size={32}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    {form.name || "Nom du badge"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Aperçu</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Catégorie</Label>
@@ -320,17 +383,45 @@ function AdminBadgesPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Type de règle</Label>
-                <Input
+                <Select
                   value={form.rule_type}
-                  placeholder="ex: lessons_completed"
-                  onChange={(e) => setField("rule_type", e.target.value)}
-                />
+                  onValueChange={(v) => setField("rule_type", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lessons_completed">
+                      Leçons terminées
+                    </SelectItem>
+                    <SelectItem value="courses_completed">
+                      Cours terminés
+                    </SelectItem>
+                    <SelectItem value="courses_enrolled">
+                      Inscriptions
+                    </SelectItem>
+                    <SelectItem value="reviews_posted">
+                      Avis publiés
+                    </SelectItem>
+                    <SelectItem value="streak_days">
+                      Jours consécutifs
+                    </SelectItem>
+                    <SelectItem value="xp_earned">XP accumulés</SelectItem>
+                    <SelectItem value="quizzes_passed">
+                      Quiz réussis
+                    </SelectItem>
+                    <SelectItem value="manual">
+                      Attribution manuelle
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label>Seuil</Label>
                 <Input
                   type="number"
                   value={form.rule_threshold}
+                  disabled={form.rule_type === "manual"}
                   onChange={(e) =>
                     setField("rule_threshold", parseInt(e.target.value) || 0)
                   }

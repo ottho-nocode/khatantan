@@ -1,14 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDatabaseQuery } from "@/utilities";
+import { useTranslation } from "@/contexts/Language";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/courses/course-card";
 
 function HomePage() {
+  const { t } = useTranslation();
+
   const { data: coursesData, isLoading } = useDatabaseQuery({
     from: "courses",
     where: { field: "status", operator: "eq", value: "published" },
-    include: { instructor_profiles: { include: { profiles: true } } },
+    include: { instructor_profiles: { include: { profiles: true } }, categories: true },
     orderBy: [{ field: "created_at", direction: "desc" }],
     limit: 3,
   });
@@ -25,26 +28,24 @@ function HomePage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-32 lg:px-8">
           <div className="max-w-2xl">
             <h1 className="mb-6 font-serif text-4xl font-bold leading-tight text-foreground md:text-6xl">
-              &Eacute;veillez votre potentiel spirituel et personnel
+              {t("home.heroTitle")}
             </h1>
             <p className="mb-8 text-lg leading-relaxed text-muted-foreground md:text-xl">
-              La premi&egrave;re marketplace de cours en ligne en Mongolie
-              d&eacute;di&eacute;e au bien-&ecirc;tre, &agrave; la
-              spiritualit&eacute; et au d&eacute;veloppement personnel.
+              {t("home.heroSubtitle")}
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link to="/courses">
                 <Button size="lg" className="w-full text-base sm:w-auto">
-                  D&eacute;couvrir les cours
+                  {t("home.discoverCourses")}
                 </Button>
               </Link>
-              <Link to="/leaderboard">
+              <Link to="/courses">
                 <Button
                   variant="outline"
                   size="lg"
                   className="w-full text-base sm:w-auto"
                 >
-                  En savoir plus
+                  {t("home.learnMore")}
                 </Button>
               </Link>
             </div>
@@ -58,11 +59,10 @@ function HomePage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-12 text-center">
               <h2 className="mb-4 font-serif text-3xl font-bold text-foreground">
-                Explorez par cat&eacute;gories
+                {t("home.exploreCategories")}
               </h2>
               <p className="mx-auto max-w-2xl text-muted-foreground">
-                Trouvez le chemin qui vous correspond parmi nos th&eacute;matiques
-                vari&eacute;es.
+                {t("home.exploreCategoriesSubtitle")}
               </p>
             </div>
 
@@ -100,18 +100,17 @@ function HomePage() {
           <div className="mb-12 flex items-end justify-between">
             <div>
               <h2 className="mb-4 font-serif text-3xl font-bold text-foreground">
-                Cours populaires
+                {t("home.popularCourses")}
               </h2>
               <p className="text-muted-foreground">
-                Les formations les plus pl&eacute;biscit&eacute;es par notre
-                communaut&eacute;.
+                {t("home.popularCoursesSubtitle")}
               </p>
             </div>
             <Link
               to="/courses"
               className="hidden items-center font-medium text-primary hover:text-primary/80 md:flex"
             >
-              Voir tout <ArrowRight className="ml-2 h-4 w-4" />
+              {t("home.viewAll")} <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
 
@@ -131,7 +130,7 @@ function HomePage() {
           <div className="mt-8 text-center md:hidden">
             <Link to="/courses">
               <Button variant="outline" className="w-full">
-                Voir tous les cours
+                {t("home.viewAllCourses")}
               </Button>
             </Link>
           </div>
@@ -151,23 +150,22 @@ function HomePage() {
         </div>
         <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
           <h2 className="mb-6 font-serif text-3xl font-bold md:text-4xl">
-            Rejoignez la communaut&eacute; Khatantan
+            {t("home.joinCommunity")}
           </h2>
           <p className="mb-8 text-lg text-white/80">
-            Inscrivez-vous pour recevoir nos conseils bien-&ecirc;tre et
-            &ecirc;tre inform&eacute; des nouveaux cours.
+            {t("home.joinCommunitySubtitle")}
           </p>
           <div className="mx-auto flex max-w-md flex-col justify-center gap-3 sm:flex-row">
             <input
               type="email"
-              placeholder="Votre adresse email"
+              placeholder={t("home.emailPlaceholder")}
               className="w-full rounded-full px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-white/50"
             />
             <Button
               size="lg"
               className="bg-white text-primary hover:bg-white/90"
             >
-              S'inscrire
+              {t("home.subscribe")}
             </Button>
           </div>
         </div>

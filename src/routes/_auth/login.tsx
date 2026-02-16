@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function LoginPage() {
   const { signIn } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +26,24 @@ function LoginPage() {
       setError(error);
       setIsLoading(false);
     } else {
-      navigate({ to: "/" });
+      // Fetch profile to determine role-based redirect
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+        if (profile?.role === "admin") {
+          navigate({ to: "/admin/dashboard" });
+        } else if (profile?.role === "instructor") {
+          navigate({ to: "/instructor/dashboard" });
+        } else {
+          navigate({ to: "/dashboard" });
+        }
+      } else {
+        navigate({ to: "/" });
+      }
     }
   };
 
@@ -34,10 +54,10 @@ function LoginPage() {
           K
         </div>
         <h2 className="font-serif text-3xl font-bold text-foreground">
-          Connexion
+          {t("auth.login")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Heureux de vous revoir sur Khatantan
+          {t("auth.loginSubtitle")}
         </p>
       </div>
 
@@ -48,11 +68,11 @@ function LoginPage() {
           </div>
         )}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="vous@exemple.com"
+            placeholder={t("auth.emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="rounded-lg"
@@ -60,7 +80,7 @@ function LoginPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">{t("auth.password")}</Label>
           <Input
             id="password"
             type="password"
@@ -84,29 +104,29 @@ function LoginPage() {
               htmlFor="remember-me"
               className="ml-2 block text-sm text-foreground"
             >
-              Se souvenir de moi
+              {t("auth.rememberMe")}
             </label>
           </div>
           <div className="text-sm">
             <span className="cursor-pointer font-medium text-primary hover:text-primary/80">
-              Mot de passe oubli&eacute; ?
+              {t("auth.forgotPassword")}
             </span>
           </div>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Connexion..." : "Se connecter"}
+          {isLoading ? t("auth.loggingIn") : t("auth.loginButton")}
         </Button>
       </form>
 
       <div className="mt-4 text-center">
         <p className="text-sm text-muted-foreground">
-          Pas encore de compte ?{" "}
+          {t("auth.noAccount")}{" "}
           <Link
             to="/register"
             className="font-medium text-primary hover:text-primary/80"
           >
-            S'inscrire
+            {t("auth.register")}
           </Link>
         </p>
       </div>

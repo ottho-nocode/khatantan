@@ -2,16 +2,19 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/theme-provider";
 import { AuthProvider } from "@/contexts/Auth";
+import { LanguageProvider } from "@/contexts/Language";
 import QueriesContext from "@/contexts/queries";
 
 function RootComponent() {
   return (
     <QueriesContext>
       <AuthProvider>
-        <ThemeProvider defaultTheme="system" storageKey="theme">
-          <Outlet />
-          <Toaster richColors />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider defaultTheme="system" storageKey="theme">
+            <Outlet />
+            <Toaster richColors />
+          </ThemeProvider>
+        </LanguageProvider>
       </AuthProvider>
     </QueriesContext>
   );

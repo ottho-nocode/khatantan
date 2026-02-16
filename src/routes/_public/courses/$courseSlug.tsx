@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import database from "@/services/database";
 import { useDatabaseQuery } from "@/utilities/useDatabaseQuery";
+import { useDatabaseMutation } from "@/utilities/useDatabaseMutation";
 import { useAuth } from "@/contexts/Auth";
+import { useTranslation } from "@/contexts/Language";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -19,20 +21,12 @@ import {
   Eye,
   Check,
   Play,
-  Share2,
   Heart,
   Infinity,
   MessageCircle,
   GraduationCap,
 } from "lucide-react";
 import { ReviewsList } from "@/components/student/reviews-list";
-
-const levelLabels: Record<string, string> = {
-  beginner: "Débutant",
-  intermediate: "Intermédiaire",
-  advanced: "Avancé",
-  all_levels: "Tous niveaux",
-};
 
 const typeIcons: Record<string, React.ElementType> = {
   video: Video,
@@ -47,13 +41,10 @@ function ModuleAccordion({
   module: any;
   index: number;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(index === 0);
   const lessons = [...(module.lessons ?? [])].sort(
     (a: any, b: any) => (a.position ?? 0) - (b.position ?? 0),
-  );
-  const moduleDuration = lessons.reduce(
-    (acc: number, l: any) => acc + (l.video_duration_seconds ?? 0),
-    0,
   );
 
   return (
@@ -72,7 +63,8 @@ function ModuleAccordion({
           {module.title}
         </span>
         <span className="text-xs text-muted-foreground">
-          {lessons.length} leçon{lessons.length !== 1 ? "s" : ""}
+          {lessons.length}{" "}
+          {lessons.length !== 1 ? t("courses.lessons") : t("courses.lesson")}
         </span>
       </button>
       {open && (
@@ -101,7 +93,7 @@ function ModuleAccordion({
                 {lesson.is_preview && (
                   <span className="text-[10px] font-medium uppercase text-primary">
                     <Eye className="mr-0.5 inline h-3 w-3" />
-                    Aperçu
+                    {t("courses.preview")}
                   </span>
                 )}
                 {mins > 0 && (
@@ -123,9 +115,17 @@ function ModuleAccordion({
 function CourseDetailPage() {
   const { courseSlug } = Route.useParams();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [enrolling, setEnrolling] = useState(false);
+
+  const levelLabels: Record<string, string> = {
+    beginner: t("courses.beginner"),
+    intermediate: t("courses.intermediate"),
+    advanced: t("courses.advanced"),
+    all_levels: t("courses.allLevels"),
+  };
 
   const { data: course, isLoading } = useQuery({
     queryKey: ["course-detail", courseSlug],
@@ -156,6 +156,48 @@ function CourseDetailPage() {
 
   const isEnrolled = (enrollmentData?.data?.length ?? 0) > 0;
 
+  // Favorites
+  const { data: favoriteData } = useDatabaseQuery({
+    from: "favorites",
+    where: {
+      operator: "and",
+      conditions: [
+        { field: "student_id", operator: "eq", value: user?.id ?? "" },
+        { field: "course_id", operator: "eq", value: (course as any)?.id ?? "" },
+      ],
+    },
+    limit: 1,
+  });
+  const existingFavorite = favoriteData?.data?.[0] as any;
+  const isFavorited = !!existingFavorite;
+  const { createRow: createFavorite, deleteRow: deleteFavorite } =
+    useDatabaseMutation({ table: "favorites" });
+  const [togglingFav, setTogglingFav] = useState(false);
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    setTogglingFav(true);
+    try {
+      if (isFavorited) {
+        await deleteFavorite({ id: existingFavorite.id });
+        toast.success(t("courses.removedFromFavorites"));
+      } else {
+        await createFavorite({
+          data: { student_id: user.id, course_id: (course as any).id },
+        });
+        toast.success(t("courses.addedToFavorites"));
+      }
+      queryClient.invalidateQueries({ queryKey: ["database", "favorites"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? t("common.error"));
+    } finally {
+      setTogglingFav(false);
+    }
+  };
+
   const handleEnroll = async () => {
     if (!user) {
       navigate({ to: "/login" });
@@ -170,10 +212,10 @@ function CourseDetailPage() {
       queryClient.invalidateQueries({
         queryKey: ["database", "enrollments"],
       });
-      toast.success("Inscrit avec succès !");
+      toast.success(t("courses.enrolledSuccess"));
       navigate({ to: "/learn/$courseSlug", params: { courseSlug } });
     } catch (err: any) {
-      toast.error(err?.message ?? "Erreur lors de l'inscription");
+      toast.error(err?.message ?? t("courses.enrollError"));
     } finally {
       setEnrolling(false);
     }
@@ -190,9 +232,9 @@ function CourseDetailPage() {
   if (!course) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-16 text-center">
-        <p className="text-xl text-muted-foreground">Cours introuvable.</p>
+        <p className="text-xl text-muted-foreground">{t("courses.notFound")}</p>
         <Link to="/courses" className="mt-4 text-primary hover:underline">
-          Retour au catalogue
+          {t("courses.backToCatalog")}
         </Link>
       </div>
     );
@@ -226,15 +268,15 @@ function CourseDetailPage() {
 
   const instructor = c.instructor_profiles;
   const instructorName =
-    instructor?.profiles?.display_name ?? "Instructeur";
+    instructor?.profiles?.display_name ?? t("courses.instructor");
   const instructorBio = instructor?.profiles?.bio ?? "";
   const instructorAvatar = instructor?.profiles?.avatar_url ?? "";
 
   const priceCents = c.price_cents ?? 0;
   const price =
     priceCents > 0
-      ? `${(priceCents / 100).toLocaleString("fr-FR")} ₮`
-      : "Gratuit";
+      ? `${(priceCents / 100).toLocaleString("fr-FR")} \u20ae`
+      : t("courses.free");
 
   return (
     <div className="pb-16">
@@ -273,10 +315,11 @@ function CourseDetailPage() {
             )}
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              {c.total_students?.toLocaleString("fr-FR") ?? 0} étudiants
+              {c.total_students?.toLocaleString("fr-FR") ?? 0}{" "}
+              {t("courses.students")}
             </span>
             <span>
-              Créé par{" "}
+              {t("courses.createdBy")}{" "}
               <span className="font-medium text-foreground underline underline-offset-2">
                 {instructorName}
               </span>
@@ -286,8 +329,9 @@ function CourseDetailPage() {
           {durationLabel && (
             <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              {sortedModules.length} sections &bull; {totalLessons} leçons
-              &bull; {durationLabel} au total
+              {sortedModules.length} {t("courses.sections")} &bull;{" "}
+              {totalLessons} {t("courses.lessons")} &bull; {durationLabel}{" "}
+              {t("courses.total")}
             </p>
           )}
         </div>
@@ -302,7 +346,7 @@ function CourseDetailPage() {
             {c.what_you_will_learn?.length > 0 && (
               <section>
                 <h2 className="font-serif text-xl font-bold text-foreground">
-                  Ce que vous allez apprendre
+                  {t("courses.whatYouWillLearn")}
                 </h2>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {c.what_you_will_learn.map(
@@ -323,11 +367,14 @@ function CourseDetailPage() {
             {/* Course content */}
             <section>
               <h2 className="font-serif text-xl font-bold text-foreground">
-                Contenu du cours
+                {t("courses.courseContent")}
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                {sortedModules.length} sections &bull; {totalLessons} leçons
-                {durationLabel ? ` \u2022 ${durationLabel} au total` : ""}
+                {sortedModules.length} {t("courses.sections")} &bull;{" "}
+                {totalLessons} {t("courses.lessons")}
+                {durationLabel
+                  ? ` \u2022 ${durationLabel} ${t("courses.total")}`
+                  : ""}
               </p>
               <div className="mt-4 overflow-hidden rounded-2xl border border-primary/10">
                 {sortedModules.length > 0 ? (
@@ -336,7 +383,7 @@ function CourseDetailPage() {
                   ))
                 ) : (
                   <p className="p-6 text-sm text-muted-foreground">
-                    Aucun contenu pour le moment.
+                    {t("courses.noContent")}
                   </p>
                 )}
               </div>
@@ -346,7 +393,7 @@ function CourseDetailPage() {
             {c.description && (
               <section>
                 <h2 className="font-serif text-xl font-bold text-foreground">
-                  Description
+                  {t("courses.description")}
                 </h2>
                 <div
                   className="mt-4 text-sm leading-relaxed text-muted-foreground [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-primary [&_a]:underline"
@@ -358,7 +405,7 @@ function CourseDetailPage() {
             {/* Instructor */}
             <section>
               <h2 className="font-serif text-xl font-bold text-foreground">
-                Votre enseignant
+                {t("courses.yourInstructor")}
               </h2>
               <div className="mt-4 flex items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
@@ -393,7 +440,7 @@ function CourseDetailPage() {
             {/* Reviews */}
             <section>
               <h2 className="font-serif text-xl font-bold text-foreground">
-                Avis des étudiants
+                {t("courses.studentReviews")}
               </h2>
               <div className="mt-4">
                 <ReviewsList courseId={c.id} />
@@ -427,7 +474,8 @@ function CourseDetailPage() {
                   </span>
                   {priceCents > 0 && c.original_price_cents && (
                     <span className="text-sm text-muted-foreground line-through">
-                      {(c.original_price_cents / 100).toLocaleString("fr-FR")} ₮
+                      {(c.original_price_cents / 100).toLocaleString("fr-FR")}{" "}
+                      \u20ae
                     </span>
                   )}
                 </div>
@@ -437,7 +485,7 @@ function CourseDetailPage() {
                   <Link to="/learn/$courseSlug" params={{ courseSlug }}>
                     <Button className="w-full gap-2" size="lg">
                       <Play className="h-4 w-4" />
-                      Continuer le cours
+                      {t("courses.continueCourse")}
                     </Button>
                   </Link>
                 ) : (
@@ -448,16 +496,16 @@ function CourseDetailPage() {
                     disabled={enrolling}
                   >
                     {enrolling
-                      ? "Inscription..."
+                      ? t("courses.enrolling")
                       : priceCents > 0
-                        ? "Acheter ce cours"
-                        : "S'inscrire gratuitement"}
+                        ? t("courses.buyCourse")
+                        : t("courses.enrollFree")}
                   </Button>
                 )}
 
                 {priceCents > 0 && (
                   <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                    Garantie satisfait ou remboursé de 30 jours
+                    {t("courses.guarantee")}
                   </p>
                 )}
 
@@ -465,27 +513,37 @@ function CourseDetailPage() {
                 <div className="mt-5 flex flex-col gap-3 border-t border-primary/10 pt-5">
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <Infinity className="h-4 w-4 shrink-0 text-primary" />
-                    Accès illimité
+                    {t("courses.unlimitedAccess")}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
-                    Communauté privée
+                    {t("courses.privateCommunity")}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <GraduationCap className="h-4 w-4 shrink-0 text-primary" />
-                    Certificat de fin
+                    {t("courses.certificate")}
                   </div>
                 </div>
 
-                {/* Share / Favorite */}
-                <div className="mt-5 flex items-center justify-center gap-4 border-t border-primary/10 pt-4">
-                  <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                    <Share2 className="h-4 w-4" />
-                    Partager
-                  </button>
-                  <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-                    <Heart className="h-4 w-4" />
-                    Favoris
+                {/* Favorite */}
+                <div className="mt-5 border-t border-primary/10 pt-4">
+                  <button
+                    onClick={handleToggleFavorite}
+                    disabled={togglingFav}
+                    className={`flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors ${
+                      isFavorited
+                        ? "text-primary hover:bg-primary/5"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }`}
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${isFavorited ? "fill-primary text-primary" : ""}`}
+                    />
+                    {togglingFav
+                      ? "..."
+                      : isFavorited
+                        ? t("courses.inFavorites")
+                        : t("courses.addToFavorites")}
                   </button>
                 </div>
               </div>
