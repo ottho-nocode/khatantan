@@ -152,6 +152,9 @@ const fr: Translations = {
   "auth.registerButton": "S'inscrire",
   "auth.hasAccount": "D\u00e9j\u00e0 un compte ?",
   "auth.loginLink": "Se connecter",
+  "auth.confirmEmailTitle": "V\u00e9rifiez votre bo\u00eete mail",
+  "auth.confirmEmailMessage": "Un email de confirmation vient de vous \u00eatre envoy\u00e9. Cliquez sur le lien dans l'email pour activer votre compte.",
+  "auth.confirmEmailOk": "Compris",
 
   // Dashboard
   "dashboard.hello": "Bonjour, {name} !",
@@ -333,6 +336,9 @@ const en: Translations = {
   "auth.registerButton": "Sign up",
   "auth.hasAccount": "Already have an account?",
   "auth.loginLink": "Log in",
+  "auth.confirmEmailTitle": "Check your inbox",
+  "auth.confirmEmailMessage": "A confirmation email has been sent to you. Click the link in the email to activate your account.",
+  "auth.confirmEmailOk": "Got it",
 
   // Dashboard
   "dashboard.hello": "Hello, {name}!",
@@ -559,6 +565,9 @@ const mn: Translations = {
   "auth.hasAccount":
     "\u0411\u04af\u0440\u0442\u0433\u044d\u043b\u0442\u044d\u0439 \u044e\u0443?",
   "auth.loginLink": "\u041d\u044d\u0432\u0442\u0440\u044d\u0445",
+  "auth.confirmEmailTitle": "\u0418-\u043c\u044d\u0439\u043b\u044d\u044d \u0448\u0430\u043b\u0433\u0430\u043d\u0430 \u0443\u0443",
+  "auth.confirmEmailMessage": "\u0411\u0430\u0442\u0430\u043b\u0433\u0430\u0430\u0436\u0443\u0443\u043b\u0430\u0445 \u0438-\u043c\u044d\u0439\u043b \u0438\u043b\u0433\u044d\u044d\u0433\u0434\u0441\u044d\u043d. \u0411\u04af\u0440\u0442\u0433\u044d\u043b\u044d\u044d \u0438\u0434\u044d\u0432\u0445\u0436\u04af\u04af\u043b\u044d\u0445\u0438\u0439\u043d \u0442\u0443\u043b\u0434 \u0438-\u043c\u044d\u0439\u043b \u0434\u044d\u0445 \u043b\u0438\u043d\u043a \u0434\u044d\u044d\u0440 \u0434\u0430\u0440\u043d\u0430 \u0443\u0443.",
+  "auth.confirmEmailOk": "\u041e\u0439\u043b\u0433\u043e\u043b\u043e\u043e",
 
   // Dashboard
   "dashboard.hello": "\u0421\u0430\u0439\u043d \u0431\u0430\u0439\u043d\u0430 \u0443\u0443, {name}!",

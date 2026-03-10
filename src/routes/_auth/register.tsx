@@ -5,6 +5,14 @@ import { useTranslation } from "@/contexts/Language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function RegisterPage() {
   const { signUp } = useAuth();
@@ -15,6 +23,7 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +35,8 @@ function RegisterPage() {
       setError(error);
       setIsLoading(false);
     } else {
-      navigate({ to: "/" });
+      setIsLoading(false);
+      setShowConfirmModal(true);
     }
   };
 
@@ -120,6 +130,22 @@ function RegisterPage() {
           </Link>
         </p>
       </div>
+
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("auth.confirmEmailTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("auth.confirmEmailMessage")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => navigate({ to: "/login" })}>
+              {t("auth.confirmEmailOk")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
